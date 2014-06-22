@@ -1,37 +1,62 @@
-
 var irkit = {
-    privateAddress: '192.168.1.43',
-    clientKey: '',
-    deviceId: '',
+  privateAddress: '192.168.1.43',
+  clientKey: '',
+  deviceId: '',
+  commands: [
+    {'name': 'AirCold'},
+    {'name': 'AirWarm'},
+    {'name': 'AirOff'}
+  ]
 };
 
 var message = '{"format":"raw","data":[6881,3341,904,2451,904,904,904,904,904,904,904,2451,904,904,904,904,904,904,904,904,904,2451,904,904,904,2451,904,2451,904,904,904,2451,904,2451,904,2451,904,2451,904,2451,904,787,873,787,873,2451,873,873,873,873,873,787,873,787,873,787,873,787,873,2451,904,2451,904,2451,904,2451,904,787,873,787,873,787,873,787,787,787,873,787,873,787,873,787,873,787,873,787,787,787,873,787,787,787,873,787,873,787,873,787,873,787,873,787,873,787,873,787,873,787,873,787,873,787,873,787,873,787,873,2451,873,873,873,873,873,873,873,873,873,787,904,787,787,58076,6881,3341,873,2537,904,787,904,787,904,787,787,2537,904,787,787,787,873,787,873,787,787,2537,873,873,873,2537,873,2537,873,787,787,2537,873,2537,873,2537,873,2537,873,2537,873,873,873,873,873,2537,873,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,904,787,787,787,904,787,904,787,904,787,904,787,787,787,904,787,904,787,904,787,904,2537,873,873,873,873,873,787,873,787,873,2537,904,2537,904,2537,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,2537,904,2537,904,2537,904,2537,904,904,904,2537,904,904,904,2537,904,904,904,904,904,904,904,787,873,787,873,787,873,787,873,787,873,787,873,787,873,787,787,787,873,787,873,787,873,787,873,787,787,787,787,787,873,787,787,787,787,787,873,787,787,787,873,787,873,787,787,787,873,787,873,787,787,787,873,787,787,787,873,787,873,787,873,787,787,787,787,787,873,787,787,787,787,787,873,787,873,787,787,787,787,787,787,787,787,787,873,787,787,787,787,787,787,787,787,787,873,787,787,787,787,787,873,787,787,2537,904,2537,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,904,787,787,787,904,787,787,787,787,787,787,787,787,787,787,787,787,2537,873,873,873,787,787,2537,873,2537,873,2537,873,2537,873,2537,873],"freq":38}';
 
-function postMessageByDeviceAPI(message) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://' + irkit.privateAddress + '/messages', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function(e) {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            if (xhr.status == 200) {
-                console.log(xhr.responseText);
-            } else {
-                console.log("Error");
-            }
-        }
+function postMessageToIrkitByDeviceAPI(message) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'http://' + irkit.privateAddress + '/messages', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function (e) {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      if (xhr.status == 200) {
+        console.log(xhr.responseText);
+      } else {
+        console.log("Error");
+      }
     }
-    if (typeof message === 'string') {
-        xhr.send(message);
-    } else {
-        xhr.send(JSON.stringify(message));
-    }
+  }
+  if (typeof message === 'string') {
+    xhr.send(message);
+  } else {
+    xhr.send(JSON.stringify(message));
+  }
 }
-function postMessageInternetAPI() {
 
+function postMessageToIrkitInternetAPI() {
+
+}
+
+function sendCommandsToPebble() {
+  var message = {};
+  for (var i = 0; i < irkit.commands.length; i++) {
+    message["" + i] = irkit.commands[i].name;
+  }
+  var transactionId = Pebble.sendAppMessage(
+    message,
+    function(e) {
+      console.log("Successfully delivered message with transactionId="
+        + e.data.transactionId);
+    },
+    function(e) {
+      console.log("Unable to deliver message with transactionId="
+        + e.data.transactionId
+        + " Error is: " + e.error.message);
+    }
+  );
 }
 
 Pebble.addEventListener("ready",
-    function(e) {
-        postMessageByDeviceAPI(message);
-    }
+  function (e) {
+    sendCommandsToPebble();
+    // postMessageToIrkitByDeviceAPI(message);
+  }
 );

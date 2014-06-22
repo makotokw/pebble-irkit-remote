@@ -2,3 +2,8 @@
 # Ignore build generated files
 build
 .lock-waf*
+
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
