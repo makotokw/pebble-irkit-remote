@@ -9,8 +9,9 @@
     "watchface": false
   },
   "appKeys": {
-    "dummy": 0,
-    "command": 100
+    "menu": 0,
+    "commandIndex": 127,
+    "result": 128
   },
   "resources": {
     "media": []

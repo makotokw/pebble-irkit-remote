@@ -1,6 +1,7 @@
 /*global Pebble*/
 
 var irkit = {
+  internetHttpApi: 'https://api.getirkit.com',
   privateAddress: '192.168.1.43',
   clientKey: '',
   deviceId: '',
@@ -18,23 +19,39 @@ function postMessageToIrkitByDeviceAPI(message) {
   xhr.open('POST', 'http://' + irkit.privateAddress + '/messages', true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onload = function (e) {
-    if (xhr.readyState == 4 && xhr.status == 200) {
+    if (xhr.readyState == 4) {
       if (xhr.status == 200) {
-        console.log(xhr.responseText);
+        sendCommandResult(1);
       } else {
-        console.log("Error");
+        sendCommandResult(0);
       }
     }
   }
-  if (typeof message === 'string') {
-    xhr.send(message);
-  } else {
-    xhr.send(JSON.stringify(message));
-  }
+  xhr.onerror = function (e) {
+    console.log(xhr.statusText);
+    sendCommandResult(0);
+  };
+  xhr.send(message);
 }
 
-function postMessageToIrkitInternetAPI() {
-
+function postMessageToIrkitInternetAPI(message) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', irkit.internetHttpApi + '/1/messages', true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 200) {
+        sendCommandResult(1);
+      } else {
+        sendCommandResult(0);
+      }
+    }
+  }
+  xhr.onerror = function (e) {
+    console.log(xhr.statusText);
+    sendCommandResult(0);
+  };
+  xhr.send('clientkey=' + irkit.clientKey + '&deviceid=' + irkit.deviceId + '&message=' + message);
 }
 
 function sendCommandsToPebble() {
@@ -56,17 +73,31 @@ function sendCommandsToPebble() {
   );
 }
 
+function sendCommandResult(result) {
+  var transactionId = Pebble.sendAppMessage(
+    { '128': result },
+    function(e) {
+      console.log("Successfully delivered message with transactionId="
+        + e.data.transactionId);
+    },
+    function(e) {
+      console.log("Unable to deliver message with transactionId="
+        + e.data.transactionId
+        + " Error is: " + e.error.message);
+    }
+  );
+}
+
 Pebble.addEventListener("appmessage",
   function(e) {
-    var commandIndex = e.payload.command;
+    var commandIndex = e.payload.commandIndex;
     console.log("js.appmessage.command:" + commandIndex);
-    postMessageToIrkitByDeviceAPI(irkit.commands[commandIndex].message);
+    postMessageToIrkitInternetAPI(irkit.commands[commandIndex].message);
   });
 
 Pebble.addEventListener("ready",
   function (e) {
     console.log("js.ready!");
     sendCommandsToPebble();
-    // postMessageToIrkitByDeviceAPI(message);
   }
 );

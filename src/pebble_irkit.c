@@ -11,7 +11,9 @@ char **g_command_names;
 #define NUM_MENU_SECTIONS 1
 
 enum {
-	MSG_SEND_COMMAND_KEY = 100
+	MSG_KEY_MENU = 0,
+	MSG_KEY_COMMAND_INDEX = 127,
+	MSG_KEY_RESULT = 128,
 };
 
 void commands_init() {
@@ -55,7 +57,7 @@ void send_selected_command(int index) {
   if (iter == NULL) {
     return;
   }
-  dict_write_uint8(iter, MSG_SEND_COMMAND_KEY, index);
+  dict_write_uint8(iter, MSG_KEY_COMMAND_INDEX, index);
   dict_write_end(iter);
   app_message_outbox_send();
 }
@@ -70,15 +72,23 @@ void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, voi
 
 void in_received_handler(DictionaryIterator *received, void *context) {
   // incoming message received
-  commands_init_array();
-  for (uint32_t i = 0; i < MAX_COMMANDS; i++) {
-    Tuple *text_tuple = dict_find(received, i);
-    if (text_tuple) {
-      strncpy(g_command_names[i], text_tuple->value->cstring, MAX_COMMAND_NAME_BYTE);
-      g_num_command = i + 1;
+	Tuple *tuple = NULL;
+  if ((tuple = dict_find(received, MSG_KEY_MENU))) {
+    commands_init_array();
+    for (uint32_t i = 0; i < MAX_COMMANDS; i++) {
+      Tuple *text_tuple = dict_find(received, MSG_KEY_MENU + i);
+      if (text_tuple) {
+        strncpy(g_command_names[i], text_tuple->value->cstring, MAX_COMMAND_NAME_BYTE);
+        g_num_command = i + 1;
+      }
+    }
+    menu_layer_reload_data(g_menu_layer);
+  } else if ((tuple = dict_find(received, MSG_KEY_RESULT))) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "CommandResult %d", (int)tuple->value->int32);
+    if (tuple->value->int32) {
+      vibes_short_pulse();
     }
   }
-  menu_layer_reload_data(g_menu_layer);
 }
 
 void in_dropped_handler(AppMessageResult reason, void *context) {
@@ -149,7 +159,6 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 }
 
 void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  // TODO: send cell_index to Javascript Framework
   APP_LOG(APP_LOG_LEVEL_INFO, "MenuSelected section:%d row:%d", cell_index->section, cell_index->row);
   if (cell_index->section == 0) {
     send_selected_command(cell_index->row);
