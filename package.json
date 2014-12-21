@@ -1,0 +1,8 @@
+{
+  "name": "pebble2irkit",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-exec": "^0.4.6",
+    "load-grunt-tasks": "^1.0.0"
+  }
+}

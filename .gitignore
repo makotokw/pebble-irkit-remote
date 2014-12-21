@@ -1,7 +1,9 @@
-
-# Ignore build generated files
+### Pebble ###
 build
 .lock-waf*
+
+### Node ###
+node_modules
 
 ### OSX ###
 .DS_Store
@@ -10,3 +12,6 @@ build
 
 ### ctags ###
 tags
+
+### Intellij ###
+.idea
