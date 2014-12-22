@@ -11,9 +11,9 @@ char **g_command_names;
 #define NUM_MENU_SECTIONS 1
 
 enum {
-	MSG_KEY_MENU = 0,
-	MSG_KEY_COMMAND_INDEX = 127,
-	MSG_KEY_RESULT = 128,
+  MSG_KEY_MENU = 0,
+  MSG_KEY_COMMAND_INDEX = 127,
+  MSG_KEY_RESULT = 128,
 };
 
 void commands_init() {
@@ -50,7 +50,6 @@ void commands_init_array() {
 // --------------------------------------------------------
 // Message
 
-
 void send_selected_command(int index) {
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
@@ -72,7 +71,7 @@ void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, voi
 
 void in_received_handler(DictionaryIterator *received, void *context) {
   // incoming message received
-	Tuple *tuple = NULL;
+  Tuple *tuple = NULL;
   if ((tuple = dict_find(received, MSG_KEY_MENU))) {
     commands_init_array();
     for (uint32_t i = 0; i < MAX_COMMANDS; i++) {

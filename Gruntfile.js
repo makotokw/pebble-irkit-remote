@@ -31,12 +31,22 @@ module.exports = function (grunt) {
         'Gruntfile.js',
         '<%= appConfig.srcPath %>/js/{,*/}/*.js',
         '<%= webConfig.srcPath %>/scripts/{,*/}*.js'
+      ],
+      pebble: [
+        '<%= appConfig.srcPath %>/js/{,*/}/*.js'
+      ],
+      web: [
+        '<%= webConfig.srcPath %>/scripts/{,*/}*.js'
       ]
     },
     watch: {
+      pebblejs: {
+        files: ['<%= appConfig.srcPath %>/js/{,*/}/*.js'],
+        tasks: ['jshint:pebble']
+      },
       webjs: {
         files: ['<%= webConfig.srcPath %>/scripts/{,*/}*.js'],
-        tasks: ['jshint'],
+        tasks: ['jshint:web'],
         options: {
           livereload: true
         }
@@ -149,14 +159,19 @@ module.exports = function (grunt) {
       }
     },
 
-
     // watch app
     exec: {
       pebble_build: {
         cmd: 'pebble build'
       },
+      pebble_debug_build: {
+        cmd: 'pebble build --debug'
+      },
       pebble_install: {
         cmd: 'pebble install'
+      },
+      pebble_logs: {
+        cmd: 'pebble logs'
       }
     }
   });
@@ -183,7 +198,15 @@ module.exports = function (grunt) {
     'exec:pebble_build'
   ]);
 
-  grunt.registerTask('install', [
+  grunt.registerTask('pebble_debug_install', [
+    'exec:pebble_debug_build',
+    'exec:pebble_install'
+  ]);
+  grunt.registerTask('pebble_logs', [
+    'exec:pebble_logs'
+  ]);
+
+  grunt.registerTask('pebble_install', [
     'exec:pebble_install'
   ]);
 

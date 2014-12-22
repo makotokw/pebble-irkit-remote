@@ -7,6 +7,8 @@ dist
 .tmp
 .sass-cache
 bower_components
+web/scripts/configuration.json
+web/scripts/debug.js
 
 ### Node ###
 node_modules
