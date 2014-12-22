@@ -24,7 +24,7 @@ function postMessageToIrkitByDeviceAPI(message) {
         sendCommandResult(0);
       }
     }
-  }
+  };
   xhr.onerror = function (e) {
     console.log(xhr.statusText);
     sendCommandResult(0);
@@ -44,7 +44,7 @@ function postMessageToIrkitInternetAPI(message) {
         sendCommandResult(0);
       }
     }
-  }
+  };
   xhr.onerror = function (e) {
     console.log(xhr.statusText);
     sendCommandResult(0);
@@ -60,13 +60,10 @@ function sendCommandsToPebble() {
   var transactionId = Pebble.sendAppMessage(
     message,
     function(e) {
-      console.log("Successfully delivered message with transactionId="
-        + e.data.transactionId);
+      console.log("Successfully delivered message with transactionId=" + e.data.transactionId);
     },
     function(e) {
-      console.log("Unable to deliver message with transactionId="
-        + e.data.transactionId
-        + " Error is: " + e.error.message);
+      console.log("Unable to deliver message with transactionId=" + e.data.transactionId + " Error is: " + e.error.message);
     }
   );
 }
@@ -75,13 +72,10 @@ function sendCommandResult(result) {
   var transactionId = Pebble.sendAppMessage(
     { '128': result },
     function(e) {
-      console.log("Successfully delivered message with transactionId="
-        + e.data.transactionId);
+      console.log("Successfully delivered message with transactionId=" + e.data.transactionId);
     },
     function(e) {
-      console.log("Unable to deliver message with transactionId="
-        + e.data.transactionId
-        + " Error is: " + e.error.message);
+      console.log("Unable to deliver message with transactionId=" + e.data.transactionId + " Error is: " + e.error.message);
     }
   );
 }
