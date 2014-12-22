@@ -2,6 +2,12 @@
 build
 .lock-waf*
 
+### WebApp ###
+dist
+.tmp
+.sass-cache
+bower_components
+
 ### Node ###
 node_modules
 

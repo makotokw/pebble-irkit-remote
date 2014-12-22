@@ -9,14 +9,148 @@ module.exports = function (grunt) {
 
   // Configurable paths for the application
   var appConfig = {
+    srcPath: 'src',
+    buildPath: 'build'
+  };
+  var webConfig = {
+    srcPath: 'web',
+    distPath: 'dist'
   };
 
   grunt.initConfig({
     // Project settings
-    app: appConfig,
+    appConfig: appConfig,
+    webConfig: webConfig,
+
+    // common
     jshint: {
-      all: ['Gruntfile.js', 'src/js/**/*.js']
+      options: {
+        reporter: require('jshint-stylish')
+      },
+      all: [
+        'Gruntfile.js',
+        '<%= appConfig.srcPath %>/js/{,*/}/*.js',
+        '<%= webConfig.srcPath %>/scripts/{,*/}*.js'
+      ]
     },
+    watch: {
+      webjs: {
+        files: ['<%= webConfig.srcPath %>/scripts/{,*/}*.js'],
+        tasks: ['jshint'],
+        options: {
+          livereload: true
+        }
+      },
+      sass: {
+        files: ['<%= webConfig.srcPath %>/styles/{,*/}*.{scss,sass}'],
+        tasks: ['sass:web']
+      },
+      livereload: {
+        options: {
+          livereload: '<%= connect.options.livereload %>'
+        },
+        files: [
+          '<%= webConfig.srcPath %>/{,*/}*.html',
+          '.tmp/styles/{,*/}*.css'
+        ]
+      }
+    },
+    clean: {
+      dist: {
+        files: [{
+          dot: true,
+          src: [
+            '.tmp',
+            '<%= webConfig.distPath %>/*',
+            '!<%= webConfig.distPath %>/.git*'
+          ]
+        }]
+      },
+      app: 'build',
+      web: '.tmp'
+    },
+    copy: {
+      dist: {
+        files: [{
+          expand: true,
+          dot: true,
+          cwd: '<%= webConfig.srcPath %>',
+          dest: '<%= webConfig.distPath %>',
+          src: [
+            '*.{ico,png,txt}',
+            '{,*/}*.html'
+          ]
+        }, {
+          expand: true,
+          dot: true,
+          cwd: '.',
+          src: 'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*',
+          dest: '<%= webConfig.distPath %>'
+        }]
+      }
+    },
+
+    // web app
+    sass: {
+      options: {
+        loadPath: 'bower_components'
+      },
+      web: {
+        files: [{
+          expand: true,
+          cwd: '<%= webConfig.srcPath %>/styles',
+          src: ['*.{scss,sass}'],
+          dest: '.tmp/styles',
+          ext: '.css'
+        }]
+      }
+    },
+    useminPrepare: {
+      options: {
+        dest: '<%= webConfig.distPath %>'
+      },
+      html: '<%= webConfig.srcPath %>/index.html'
+    },
+    usemin: {
+      options: {
+        assetsDirs: [
+          '<%= webConfig.distPath %>',
+          '<%= webConfig.distPath %>/images',
+          '<%= webConfig.distPath %>/styles'
+        ]
+      },
+      html: ['<%= webConfig.distPath %>/{,*/}*.html'],
+      css: ['<%= webConfig.distPath %>/styles/{,*/}*.css']
+    },
+    connect: {
+      options: {
+        port: 9000,
+        open: true,
+        livereload: 35729,
+        hostname: '0.0.0.0'
+      },
+      development: {
+        options: {
+          open: true,
+          middleware: function(connect) {
+            return [
+              connect.static('.tmp'),
+              connect().use('/bower_components', connect.static('./bower_components')),
+              connect.static(webConfig.srcPath)
+            ];
+          }
+        }
+      },
+      dist: {
+        options: {
+          base: '<%= webConfig.distPath %>',
+          livereload: false
+        }
+      }
+    },
+
+
+    // watch app
     exec: {
       pebble_build: {
         cmd: 'pebble build'
@@ -26,6 +160,24 @@ module.exports = function (grunt) {
       }
     }
   });
+
+  grunt.registerTask('web', [
+    'sass:web',
+    'connect:development',
+    'watch'
+  ]);
+
+  grunt.registerTask('dist', [
+    'clean:dist',
+    'useminPrepare',
+    'sass:web',
+    'concat:generated',
+    'cssmin:generated',
+    'uglify:generated',
+    'copy:dist',
+    'usemin',
+    'connect:dist:keepalive'
+  ]);
 
   grunt.registerTask('build', [
     'exec:pebble_build'
