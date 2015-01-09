@@ -4,6 +4,7 @@ build
 
 ### WebApp ###
 dist
+temp
 .tmp
 .sass-cache
 bower_components
