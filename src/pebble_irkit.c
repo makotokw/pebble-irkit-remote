@@ -1,10 +1,11 @@
 #include <pebble.h>
 
-Window *g_window;
-MenuLayer *g_menu_layer;
+static Window *s_window;
+static MenuLayer *s_menu_layer;
+static TextLayer *s_text_layer;
 
-uint16_t g_num_command;
-char **g_command_names;
+static uint16_t s_num_command;
+static char **s_command_names;
 
 #define MAX_COMMAND_NAME_BYTE 32
 #define MAX_COMMANDS 16
@@ -16,39 +17,70 @@ enum {
   MSG_KEY_RESULT = 128,
 };
 
+
+// --------------------------------------------------------
+// Command
+
 void commands_init() {
-  g_num_command = 0;
-  g_command_names = (char **)malloc(sizeof(char *) * MAX_COMMANDS);
-  memset(g_command_names, 0, sizeof(char *) * MAX_COMMANDS);
+  s_num_command = 0;
+  s_command_names = (char **)malloc(sizeof(char *) * MAX_COMMANDS);
+  memset(s_command_names, 0, sizeof(char *) * MAX_COMMANDS);
 }
 
 void commands_destroy() {
-  if (g_command_names) {
+  if (s_command_names) {
     for (int i = 0; i < MAX_COMMANDS; i++) {
-      if (g_command_names[i]) {
-        free(g_command_names[i]);
+      if (s_command_names[i]) {
+        free(s_command_names[i]);
       }
     }
-    free(g_command_names);
-    g_command_names = NULL;
+    free(s_command_names);
+    s_command_names = NULL;
   }
 }
 
 void commands_init_array() {
-  g_num_command = 0;
+  s_num_command = 0;
   for (int i = 0; i < MAX_COMMANDS; i++) {
-    char *command_name = g_command_names[i];
+    char *command_name = s_command_names[i];
     if (command_name) {
       free(command_name);
     }
     command_name = (char *)malloc(MAX_COMMAND_NAME_BYTE + 1);
     memset(command_name, 0, MAX_COMMAND_NAME_BYTE + 1);
-    g_command_names[i] = command_name;
+    s_command_names[i] = command_name;
   }
 }
 
 // --------------------------------------------------------
-// Message
+// Toast: popup text
+
+static void toast_init() {
+  s_text_layer = text_layer_create(GRect(0, 130, 144, 25));
+  text_layer_set_background_color(s_text_layer, GColorBlack);
+  text_layer_set_text_color(s_text_layer, GColorWhite);
+  text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
+  layer_set_hidden((Layer *)s_text_layer, true);
+  Layer *window_layer = window_get_root_layer(s_window);
+  layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
+}
+
+static void toast_show(const char *text) {
+  text_layer_set_text(s_text_layer, text);
+  layer_set_hidden((Layer *)s_text_layer, false);
+}
+
+static void toast_hide() {
+  layer_set_hidden((Layer *)s_text_layer, true);
+}
+
+static void toast_deinit() {
+  text_layer_destroy(s_text_layer);
+  s_text_layer = NULL;
+}
+
+// --------------------------------------------------------
+// Communicate
 
 void send_selected_command(int index) {
   DictionaryIterator *iter;
@@ -77,11 +109,16 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     for (uint32_t i = 0; i < MAX_COMMANDS; i++) {
       Tuple *text_tuple = dict_find(received, MSG_KEY_MENU + i);
       if (text_tuple) {
-        strncpy(g_command_names[i], text_tuple->value->cstring, MAX_COMMAND_NAME_BYTE);
-        g_num_command = i + 1;
+        strncpy(s_command_names[i], text_tuple->value->cstring, MAX_COMMAND_NAME_BYTE);
+        s_num_command = i + 1;
       }
     }
-    menu_layer_reload_data(g_menu_layer);
+    menu_layer_reload_data(s_menu_layer);
+    if (s_num_command > 0) {
+      toast_hide();
+    } else {
+      toast_show("command not found");
+    }
   } else if ((tuple = dict_find(received, MSG_KEY_RESULT))) {
     APP_LOG(APP_LOG_LEVEL_INFO, "CommandResult %d", (int)tuple->value->int32);
     if (tuple->value->int32) {
@@ -112,7 +149,7 @@ static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  return g_num_command;
+  return s_num_command;
 }
 
 static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
@@ -131,7 +168,7 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   switch (cell_index->section) {
     case 0:
-      menu_cell_basic_draw(ctx, cell_layer, g_command_names[cell_index->row], NULL, NULL);
+      menu_cell_basic_draw(ctx, cell_layer, s_command_names[cell_index->row], NULL, NULL);
 //       menu_cell_basic_draw(ctx, cell_layer, "Basic Item", "With a subtitle", NULL);
 
     //   // Use the row to specify which item we'll draw
@@ -167,9 +204,9 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *da
 static void menu_init(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-  g_menu_layer = menu_layer_create(bounds);
+  s_menu_layer = menu_layer_create(bounds);
 
-  menu_layer_set_callbacks(g_menu_layer, NULL, (MenuLayerCallbacks){
+  menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
     .get_num_sections = menu_get_num_sections_callback,
     .get_num_rows = menu_get_num_rows_callback,
     .get_header_height = menu_get_header_height_callback,
@@ -178,8 +215,13 @@ static void menu_init(Window *window) {
     .select_click = menu_select_callback,
   });
 
-  menu_layer_set_click_config_onto_window(g_menu_layer, window);
-  layer_add_child(window_layer, menu_layer_get_layer(g_menu_layer));
+  menu_layer_set_click_config_onto_window(s_menu_layer, window);
+  layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+}
+
+static void menu_deinit() {
+  menu_layer_destroy(s_menu_layer);
+  s_menu_layer = NULL;
 }
 
 // --------------------------------------------------------
@@ -203,16 +245,21 @@ static void menu_init(Window *window) {
 //   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 // }
 
+
+
 // --------------------------------------------------------
 // Window
 
 static void window_load(Window *window) {
   message_init();
+  toast_init();
   menu_init(window);
+  toast_show("loading...");
 }
 
 static void window_unload(Window *window) {
-  menu_layer_destroy(g_menu_layer);
+  menu_deinit();
+  toast_deinit();
 }
 
 // --------------------------------------------------------
@@ -220,25 +267,25 @@ static void window_unload(Window *window) {
 
 static void init(void) {
   commands_init();
-  g_window = window_create();
+  s_window = window_create();
   // window_set_click_config_provider(window, click_config_provider);
-  window_set_window_handlers(g_window, (WindowHandlers) {
+  window_set_window_handlers(s_window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
   });
   const bool animated = true;
-  window_stack_push(g_window, animated);
+  window_stack_push(s_window, animated);
 }
 
 static void deinit(void) {
-  window_destroy(g_window);
+  window_destroy(s_window);
   commands_destroy();
 }
 
 int main(void) {
   init();
 
-  APP_LOG(APP_LOG_LEVEL_INFO, "Done initializing, pushed window: %p", g_window);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Done initializing, pushed window: %p", s_window);
 
   app_event_loop();
   deinit();
