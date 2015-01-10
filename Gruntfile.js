@@ -1,5 +1,4 @@
 /*jshint node:true*/
-
 'use strict';
 
 module.exports = function (grunt) {
@@ -25,6 +24,7 @@ module.exports = function (grunt) {
     // common
     jshint: {
       options: {
+        jshintrc: '.jshintrc',
         reporter: require('jshint-stylish')
       },
       all: [
@@ -161,16 +161,16 @@ module.exports = function (grunt) {
 
     // watch app
     exec: {
-      pebble_build: {
+      pebbleBuild: {
         cmd: 'pebble build'
       },
-      pebble_debug_build: {
+      pebbleDebugBuild: {
         cmd: 'pebble build --debug'
       },
-      pebble_install: {
+      pebbleInstall: {
         cmd: 'pebble install'
       },
-      pebble_logs: {
+      pebbleLogs: {
         cmd: 'pebble logs'
       }
     }
@@ -195,19 +195,19 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('build', [
-    'exec:pebble_build'
+    'exec:pebbleBuild'
   ]);
 
-  grunt.registerTask('pebble_debug_install', [
-    'exec:pebble_debug_build',
-    'exec:pebble_install'
+  grunt.registerTask('pebbleDebugInstall', [
+    'exec:pebbleDebugBuild',
+    'exec:pebbleInstall'
   ]);
-  grunt.registerTask('pebble_logs', [
-    'exec:pebble_logs'
+  grunt.registerTask('pebbleLogs', [
+    'exec:pebbleLogs'
   ]);
 
-  grunt.registerTask('pebble_install', [
-    'exec:pebble_install'
+  grunt.registerTask('pebbleInstall', [
+    'exec:pebbleInstall'
   ]);
 
   grunt.registerTask('default', ['build']);
