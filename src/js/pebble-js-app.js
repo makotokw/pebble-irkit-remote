@@ -1,4 +1,3 @@
-/*global Pebble*/
 'use strict';
 
 var appKeys = {
@@ -7,8 +6,8 @@ var appKeys = {
   'result': 128
 };
 
-var globalConfig = {
-  configurationUrl: 'http://192.168.1.31:9000/', // for debug
+var irkitConfig = {
+  settingsUrl: 'http://192.168.1.31:9000/', // for debug
   internetHttpApi: 'https://api.getirkit.com/1',
   useDeviceAPI: false, // for local
   privateAddress: '', // for local
@@ -52,7 +51,7 @@ function onApiResponseLoaded(xhr) {
  */
 function postMessageToIRKitByDeviceAPI(message) {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'http://' + globalConfig.privateAddress + '/messages', true);
+  xhr.open('POST', 'http://' + irkitConfig.privateAddress + '/messages', true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onload = function (/*e*/) {
     onApiResponseLoaded(xhr);
@@ -69,7 +68,7 @@ function postMessageToIRKitByDeviceAPI(message) {
  */
 function postMessageToIRKitInternetAPI(message) {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', globalConfig.internetHttpApi + '/messages', true);
+  xhr.open('POST', irkitConfig.internetHttpApi + '/messages', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.onload = function (/*e*/) {
     onApiResponseLoaded(xhr);
@@ -78,13 +77,13 @@ function postMessageToIRKitInternetAPI(message) {
     console.log(xhr.statusText);
     sendCommandResult(0);
   };
-  xhr.send('clientkey=' + globalConfig.clientKey + '&deviceid=' + globalConfig.deviceId + '&message=' + message);
+  xhr.send('clientkey=' + irkitConfig.clientKey + '&deviceid=' + irkitConfig.deviceId + '&message=' + message);
 }
 
 function sendCommandsToPebble() {
   var message = {};
-  for (var i = 0; i < globalConfig.commands.length; i++) {
-    message['' + i] = globalConfig.commands[i].name;
+  for (var i = 0; i < irkitConfig.commands.length; i++) {
+    message['' + i] = irkitConfig.commands[i].name;
   }
   Pebble.sendAppMessage(
     message,
@@ -100,21 +99,22 @@ function sendCommandsToPebble() {
 Pebble.addEventListener('appmessage',
   function (e) {
     var commandIndex = e.payload.commandIndex;
-    var message = globalConfig.commands[commandIndex].message;
+    var message = irkitConfig.commands[commandIndex].message;
     console.log('js.appmessage.command:' + commandIndex);
-    if (globalConfig.useDeviceAPI) {
+    if (irkitConfig.useDeviceAPI) {
       postMessageToIRKitByDeviceAPI(message);
     } else {
       postMessageToIRKitInternetAPI(message);
     }
   });
 
+// --------------------------------------------------------
 // Configuration
 
 Pebble.addEventListener(
   'showConfiguration',
   function (/*e*/) {
-    Pebble.openURL(globalConfig.configurationUrl);
+    Pebble.openURL(irkitConfig.settingsUrl);
   }
 );
 
@@ -126,17 +126,27 @@ function parserUserConfiguration(configurationText) {
     var userConfig = JSON.parse(configurationText);
     if (userConfig) {
       console.log(userConfig);
-      globalConfig.useDeviceAPI = userConfig.useDeviceAPI;
-      globalConfig.privateAddress = userConfig.privateAddress || globalConfig.privateAddress;
-      globalConfig.clientKey = userConfig.clientKey || globalConfig.clientKey;
-      globalConfig.deviceId = userConfig.deviceId || globalConfig.deviceId;
-      globalConfig.commands = userConfig.commands || globalConfig.commands;
-      console.log('globalConfig.commands: ' + globalConfig.commands.length);
+      irkitConfig.useDeviceAPI = userConfig.useDeviceAPI;
+      irkitConfig.privateAddress = userConfig.privateAddress || irkitConfig.privateAddress;
+      irkitConfig.clientKey = userConfig.clientKey || irkitConfig.clientKey;
+      irkitConfig.deviceId = userConfig.deviceId || irkitConfig.deviceId;
+      irkitConfig.commands = userConfig.commands || irkitConfig.commands;
+      console.log('irkitConfig.commands: ' + irkitConfig.commands.length);
       sendCommandsToPebble();
-      localStorage.setItem('userConfiguration', configurationText);
+      // save
+      localStorage.setItem('cachedUserConfigurationText', configurationText);
+      return true;
     }
   } catch (e) {
     console.log(e, configurationText);
+  }
+  return false;
+}
+
+function loadUserConfigurationFromCache() {
+  var configurationText = localStorage.getItem('cachedUserConfigurationText');
+  if (configurationText) {
+    parserUserConfiguration(configurationText);
   }
 }
 
@@ -150,15 +160,15 @@ function fetchUserConfiguration(url) {
   xhr.onload = function (/*e*/) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        parserUserConfiguration(xhr.responseText);
-      } else {
-        console.log(xhr.statusText);
+        if (!parserUserConfiguration(xhr.responseText)) {
+          loadUserConfigurationFromCache();
+        }
       }
     }
   };
   xhr.onerror = function (/*e*/) {
     console.log(xhr.statusText);
-    sendCommandResult(0);
+    loadUserConfigurationFromCache();
   };
   xhr.send(null);
 }
@@ -166,23 +176,25 @@ function fetchUserConfiguration(url) {
 Pebble.addEventListener(
   'webviewclosed',
   function (e) {
-    var configuration = JSON.parse(decodeURIComponent(e.response));
-    if (configuration.userConfigUrl && configuration.userConfigUrl.match(/^https?:\/\//)) {
-      fetchUserConfiguration(configuration.userConfigUrl);
+    var settings = JSON.parse(decodeURIComponent(e.response));
+    if (settings.configurationUrl && settings.configurationUrl.match(/^https?:\/\//)) {
+      fetchUserConfiguration(settings.configurationUrl);
+      localStorage.setItem('settings.configurationUrl', settings.configurationUrl);
     }
-    console.log('Configuration window returned: ', JSON.stringify(configuration));
+    console.log('Configuration window returned: ', JSON.stringify(settings));
   }
 );
 
+// --------------------------------------------------------
 // initialize
 
 Pebble.addEventListener(
   'ready',
   function (/*e*/) {
     console.log('js.ready!');
-    var userConfiguration = localStorage.getItem('userConfiguration');
-    if (userConfiguration) {
-      parserUserConfiguration(userConfiguration);
+    var configurationUrl = localStorage.getItem('settings.configurationUrl');
+    if (configurationUrl) {
+      fetchUserConfiguration(configurationUrl);
     }
   }
 );
