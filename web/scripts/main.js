@@ -27,7 +27,6 @@
         $configurationUrl.val(window.debugSettings.configurationUrl);
       }
     }
-
     $('#saveButton').click(function () {
       var settings = validateSettings();
       if (settings) {
