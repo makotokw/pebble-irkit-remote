@@ -12,11 +12,16 @@ static char **s_command_names;
 #define NUM_MENU_SECTIONS 1
 
 enum {
-  MSG_KEY_MENU = 0,
-  MSG_KEY_COMMAND_INDEX = 127,
-  MSG_KEY_RESULT = 128,
+  MSG_KEY_MENU_ITEM = 0, // 0,1,2,...,MAX_COMMANDS-1
+  MSG_KEY_MENU_STATE = 127,
+  MSG_KEY_COMMAND_INDEX = 128,
+  MSG_KEY_COMMAND_RESULT = 129,
 };
 
+enum {
+  MENU_LOADING = 1,
+  MENU_FAILED = -1,
+};
 
 // --------------------------------------------------------
 // Command
@@ -104,10 +109,12 @@ void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, voi
 void in_received_handler(DictionaryIterator *received, void *context) {
   // incoming message received
   Tuple *tuple = NULL;
-  if ((tuple = dict_find(received, MSG_KEY_MENU))) {
+
+  // menu items
+  if ((tuple = dict_find(received, MSG_KEY_MENU_ITEM))) {
     commands_init_array();
     for (uint32_t i = 0; i < MAX_COMMANDS; i++) {
-      Tuple *text_tuple = dict_find(received, MSG_KEY_MENU + i);
+      Tuple *text_tuple = dict_find(received, MSG_KEY_MENU_ITEM + i);
       if (text_tuple) {
         strncpy(s_command_names[i], text_tuple->value->cstring, MAX_COMMAND_NAME_BYTE);
         s_num_command = i + 1;
@@ -119,7 +126,15 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     } else {
       toast_show("command not found");
     }
-  } else if ((tuple = dict_find(received, MSG_KEY_RESULT))) {
+  } else if ((tuple = dict_find(received, MSG_KEY_MENU_STATE))) { // menu state
+    int state = (int)tuple->value->int32;
+    APP_LOG(APP_LOG_LEVEL_INFO, "MenuState %d", state);
+    if (state == MENU_LOADING) {
+      toast_show("loading...");
+    } else if (state == MENU_FAILED) {
+      toast_show("command not found");
+    }
+  } else if ((tuple = dict_find(received, MSG_KEY_COMMAND_RESULT))) { // send command result
     APP_LOG(APP_LOG_LEVEL_INFO, "CommandResult %d", (int)tuple->value->int32);
     if (tuple->value->int32) {
       vibes_short_pulse();

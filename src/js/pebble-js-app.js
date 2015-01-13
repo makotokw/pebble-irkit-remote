@@ -1,9 +1,15 @@
 'use strict';
 
 var appKeys = {
-  'menu': 0,
-  'commandIndex': 127,
-  'result': 128
+  'menuItem': 0,
+  'menuState': 127,
+  'commandIndex': 128,
+  'commandResult': 129
+};
+
+var menuState = {
+  loading: 1,
+  failed: -1
 };
 
 var irkitConfig = {
@@ -17,11 +23,28 @@ var irkitConfig = {
 };
 
 /**
+ * @param {Number} state
+ */
+function sendMenuState(state) {
+  var message = {};
+  message[appKeys.menuState] = state;
+  Pebble.sendAppMessage(
+    message,
+    function (e) {
+      console.log('Successfully delivered message with transactionId=' + e.data.transactionId);
+    },
+    function (e) {
+      console.log('Unable to deliver message with transactionId=' + e.data.transactionId + ' Error is: ' + e.error.message);
+    }
+  );
+}
+
+/**
  * @param {Number} result
  */
 function sendCommandResult(result) {
   var message = {};
-  message[appKeys.result] = result;
+  message[appKeys.commandResult] = result;
   Pebble.sendAppMessage(
     message,
     function (e) {
@@ -57,7 +80,6 @@ function postMessageToIRKitByDeviceAPI(message) {
     onApiResponseLoaded(xhr);
   };
   xhr.onerror = function (/*e*/) {
-    console.log(xhr.statusText);
     sendCommandResult(0);
   };
   xhr.send(message);
@@ -74,16 +96,15 @@ function postMessageToIRKitInternetAPI(message) {
     onApiResponseLoaded(xhr);
   };
   xhr.onerror = function (/*e*/) {
-    console.log(xhr.statusText);
     sendCommandResult(0);
   };
   xhr.send('clientkey=' + irkitConfig.clientKey + '&deviceid=' + irkitConfig.deviceId + '&message=' + message);
 }
 
-function sendCommandsToPebble() {
+function sendCommandsToPebble(commands) {
   var message = {};
-  for (var i = 0; i < irkitConfig.commands.length; i++) {
-    message['' + i] = irkitConfig.commands[i].name;
+  for (var i = 0; i < commands.length; i++) {
+    message['' + i] = commands[i].name;
   }
   Pebble.sendAppMessage(
     message,
@@ -100,7 +121,7 @@ Pebble.addEventListener('appmessage',
   function (e) {
     var commandIndex = e.payload.commandIndex;
     var message = irkitConfig.commands[commandIndex].message;
-    console.log('js.appmessage.command:' + commandIndex);
+    console.log('sendCommandByIndex:' + commandIndex);
     if (irkitConfig.useDeviceAPI) {
       postMessageToIRKitByDeviceAPI(message);
     } else {
@@ -120,6 +141,7 @@ Pebble.addEventListener(
 
 /**
  * @param {String} configurationText
+ * @returns {boolean}
  */
 function parserUserConfiguration(configurationText) {
   try {
@@ -132,7 +154,7 @@ function parserUserConfiguration(configurationText) {
       irkitConfig.deviceId = userConfig.deviceId || irkitConfig.deviceId;
       irkitConfig.commands = userConfig.commands || irkitConfig.commands;
       console.log('irkitConfig.commands: ' + irkitConfig.commands.length);
-      sendCommandsToPebble();
+      sendCommandsToPebble(irkitConfig.commands);
       // save
       localStorage.setItem('cachedUserConfigurationText', configurationText);
       return true;
@@ -143,33 +165,49 @@ function parserUserConfiguration(configurationText) {
   return false;
 }
 
+/**
+ * @returns {boolean}
+ */
 function loadUserConfigurationFromCache() {
   var configurationText = localStorage.getItem('cachedUserConfigurationText');
   if (configurationText) {
-    parserUserConfiguration(configurationText);
+    return parserUserConfiguration(configurationText);
   }
+  return false;
 }
 
 /**
  * @param {String} url
  */
 function fetchUserConfiguration(url) {
-  console.log('fetch user commands: ', url);
+  console.log('fetch user commands: ' + url);
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
+
+  function handleConfiguration() {
+    var success = false;
+    console.log('fetch user commands: ' + url + ' ' + xhr.status);
+    if (xhr.status === 200) {
+      success = parserUserConfiguration(xhr.responseText);
+    }
+    if (!success) {
+      success = loadUserConfigurationFromCache();
+    }
+    if (!success) {
+      sendMenuState(menuState.failed);
+    }
+  }
+
   xhr.onload = function (/*e*/) {
     if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        if (!parserUserConfiguration(xhr.responseText)) {
-          loadUserConfigurationFromCache();
-        }
-      }
+      handleConfiguration();
     }
   };
   xhr.onerror = function (/*e*/) {
-    console.log(xhr.statusText);
-    loadUserConfigurationFromCache();
+    handleConfiguration();
   };
+
+  sendMenuState(menuState.loading);
   xhr.send(null);
 }
 
