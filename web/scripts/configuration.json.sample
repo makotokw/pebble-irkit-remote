@@ -1,0 +1,9 @@
+{
+  "clientKey": "",
+  "deviceId": "",
+  "commands": [
+    {"name": "AirCold", "message": "{\"format\":\"raw\",\"data\":[0,1,2],\"freq\":38}"},
+    {"name": "AirWarm", "message": "{\"freq\":38,\"format\":\"raw\",\"data\":[1,2,3]}"},
+    {"name": "AirOff", "message": "{\"format\":\"raw\",\"data\":[4,5,6],\"freq\":38}"}
+  ]
+}
