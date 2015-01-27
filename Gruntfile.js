@@ -6,6 +6,9 @@ module.exports = function (grunt) {
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt);
 
+  // watchapp info
+  var appInfo = grunt.file.readJSON('appinfo.json');
+
   // Configurable paths for the application
   var appConfig = {
     srcPath: 'src',
@@ -66,6 +69,7 @@ module.exports = function (grunt) {
       }
     },
     clean: {
+      app: 'build',
       dist: {
         files: [{
           dot: true,
@@ -76,7 +80,6 @@ module.exports = function (grunt) {
           ]
         }]
       },
-      app: 'build',
       web: '.tmp'
     },
     copy: {
@@ -176,13 +179,13 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('web', [
+  grunt.registerTask('settingsDebug', [
     'sass:web',
     'connect:development',
     'watch'
   ]);
 
-  grunt.registerTask('dist', [
+  grunt.registerTask('settingsBuild', [
     'clean:dist',
     'useminPrepare',
     'sass:web',
@@ -190,12 +193,15 @@ module.exports = function (grunt) {
     'cssmin:generated',
     'uglify:generated',
     'copy:dist',
-    'usemin',
-    'connect:dist:keepalive'
+    'usemin'
   ]);
 
-  grunt.registerTask('build', [
-    'exec:pebbleBuild'
+  grunt.registerTask('pebbleDebugBuild', [
+    'exec:pebbleDebugBuild'
+  ]);
+
+  grunt.registerTask('pebbleInstall', [
+    'exec:pebbleInstall'
   ]);
 
   grunt.registerTask('pebbleDebugInstall', [
@@ -206,8 +212,9 @@ module.exports = function (grunt) {
     'exec:pebbleLogs'
   ]);
 
-  grunt.registerTask('pebbleInstall', [
-    'exec:pebbleInstall'
+  grunt.registerTask('build', [
+    'exec:pebbleBuild',
+    'settingsBuild'
   ]);
 
   grunt.registerTask('default', ['build']);
