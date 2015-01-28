@@ -8,6 +8,7 @@ temp
 .tmp
 .sass-cache
 bower_components
+!dist/bower_components
 web/scripts/configuration.json
 web/scripts/debug.js
 
