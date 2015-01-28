@@ -1,6 +1,10 @@
 Pebble to IRKit
 ===================
 
+Send IR signal to [IRKit](http://getirkit.com/). (IRKit device is IR remote controller and is seller in only Japan)
+
+![](https://dl.dropboxusercontent.com/u/8932138/screenshot/pebble/pebble2irkit/pebble2irkit_1.0.png)
+
 ## Development
 
 ### Requirements
@@ -37,3 +41,10 @@ grunt settingsDebug
 ```
 
 Modify ``irkitConfig.settingsUrl`` on ``src/js/pebble-js-app.js`` to connect localhost.
+
+### Deploy settings page
+
+```
+git commit dist
+git subtree push --prefix dist origin gh-pages
+```
