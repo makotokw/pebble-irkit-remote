@@ -5,14 +5,20 @@ module.exports = function (grunt) {
 
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt);
+  require('date-utils');
+
+  var path = require('path');
 
   // watchapp info
   var appInfo = grunt.file.readJSON('appinfo.json');
+  appInfo.baseName = path.basename(__dirname);
+  appInfo.buildDate = new Date();
 
   // Configurable paths for the application
   var appConfig = {
     srcPath: 'src',
-    buildPath: 'build'
+    buildPath: 'build',
+    packagesPath: 'packages'
   };
   var webConfig = {
     srcPath: 'web',
@@ -21,6 +27,7 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     // Project settings
+    appInfo: appInfo,
     appConfig: appConfig,
     webConfig: webConfig,
 
@@ -83,6 +90,12 @@ module.exports = function (grunt) {
       web: '.tmp'
     },
     copy: {
+      pbw: {
+        files: [{
+          src: '<%= appConfig.buildPath %>/<%= appInfo.baseName %>.pbw',
+          dest: '<%= appConfig.packagesPath %>/<%= appInfo.baseName %>-<%= appInfo.versionLabel %>.pbw'
+        }]
+      },
       dist: {
         files: [{
           expand: true,
@@ -214,7 +227,9 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'exec:pebbleBuild',
-    'settingsBuild'
+    'copy:pbw',
+    'settingsBuild',
+    'connect:dist'
   ]);
 
   grunt.registerTask('default', ['build']);
