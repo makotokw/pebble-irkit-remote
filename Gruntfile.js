@@ -231,7 +231,7 @@ module.exports = function (grunt) {
     'exec:pebbleInstall'
   ]);
 
-  grunt.registerTask('pebbleDebugInstall', [
+  grunt.registerTask('pebbleDebugBuildAndInstall', [
     'exec:pebbleDebugBuild',
     'exec:pebbleInstall'
   ]);

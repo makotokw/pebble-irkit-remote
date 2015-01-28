@@ -32,7 +32,6 @@
       if (settings) {
         localStorage.setItem('configurationUrl', settings.configurationUrl);
         var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
-        console.log('Warping to: ' + location);
         document.location = location;
       }
     });
