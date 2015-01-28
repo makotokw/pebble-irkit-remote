@@ -1,48 +1,45 @@
 <!doctype html>
 <html class="no-js">
-  <head>
-    <meta charset="utf-8">
-    <title>Pebble To IRKit</title>
-    <meta name="viewport" content="width=device-width">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <!-- build:css(.) vendor.css -->
-    <!-- bower:css -->
-    <!-- endbower -->
-    <!-- endbuild -->
-    <!-- build:css(.tmp) app.css -->
-    <link rel="stylesheet" href="styles/main.css">
-    <!-- endbuild -->
-  </head>
-  <body>
-
-    <div class="container">
-      <div class="header">
-        <h3 class="text-muted">Pebble To IRKit</h3>
-      </div>
-
-      <div class="form-option clearfix">
+<head>
+  <meta charset="utf-8">
+  <title>Pebble To IRKit</title>
+  <meta name="viewport" content="width=device-width">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <!-- build:css(.) styles/vendor.css -->
+  <!-- bower:css -->
+  <!-- endbower -->
+  <!-- endbuild -->
+  <!-- build:css(.tmp) styles/app.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild -->
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h3 class="text-muted">Pebble To IRKit</h3>
+  </div>
+  <div class="form-option clearfix">
         <div id="warningConfiguration" class="alert alert-danger warning-configuration" role="alert" style="display: none"></div>
-        <div class="form-group">
-          <label for="configurationUrl">Configuration Json URL</label>
-          <input type="url" class="form-control" id="configurationUrl" placeholder="http://example.com/configuration.json">
-          <p class="help-block"><a href="https://github.com/makotokw/pebble-to-irkit/wiki" target="_blank">Setting up Configuration</a></p>
-        </div>
-
-        <button id="saveButton" class="btn btn-primary pull-right">Save</button>
-      </div>
-
-      <div class="footer">
-        <p><a href="https://github.com/makotokw/pebble-to-irkit" target="_blank"><i class="fa fa-github"></i> GitHub Project</a></p>
-      </div>
-
+    <div class="form-group">
+      <label for="configurationUrl">Configuration Json URL</label>
+      <input type="url" class="form-control" id="configurationUrl" placeholder="http://example.com/configuration.json">
+      <p class="help-block">
+        <a href="https://github.com/makotokw/pebble-to-irkit/wiki" target="_blank"><span
+          class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Setting up Configuration</a>
+      </p>
     </div>
-
-    <!-- build:js(.) vendor.js -->
-    <script src="bower_components/jquery/dist/jquery.js"></script>
-    <!-- endbuild -->
-    <!-- build:js({web,.tmp}) app.js -->
-    <script src="scripts/debug.js"></script>
-    <script src="scripts/main.js"></script>
-    <!-- endbuild -->
+    <button id="saveButton" class="btn btn-primary pull-right">Save</button>
+  </div>
+  <div class="footer">
+      <p><a href="https://github.com/makotokw/pebble-to-irkit" target="_blank"><i class="fa fa-github"></i> GitHub Project</a></p>
+  </div>
+</div>
+<!-- build:js(.) scripts/vendor.js -->
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<!-- endbuild -->
+<!-- build:js({web,.tmp}) scripts/app.js -->
+<script src="scripts/debug.js"></script>
+<script src="scripts/main.js"></script>
+<!-- endbuild -->
 </body>
 </html>
