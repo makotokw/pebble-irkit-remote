@@ -3,7 +3,6 @@
   "shortName": "Pebble2IRKit",
   "longName": "Pebble to IRKit",
   "companyName": "Makoto Kawasaki",
-  "versionCode": 1,
   "versionLabel": "1.0",
   "capabilities": [
     "configurable"
