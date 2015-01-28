@@ -131,6 +131,19 @@ module.exports = function (grunt) {
         }]
       }
     },
+    concat: {
+      // exclude debug.js
+      dist: {
+        files: [
+          {
+            dest: '.tmp/concat/scripts/app.js',
+            src: [
+              '<%= webConfig.srcPath %>/scripts/main.js'
+            ]
+          }
+        ]
+      }
+    },
     useminPrepare: {
       options: {
         dest: '<%= webConfig.distPath %>'
@@ -203,6 +216,7 @@ module.exports = function (grunt) {
     'useminPrepare',
     'sass:web',
     'concat:generated',
+    'concat:dist',
     'cssmin:generated',
     'uglify:generated',
     'copy:dist',
