@@ -170,7 +170,6 @@ module.exports = function (grunt) {
       },
       development: {
         options: {
-          open: true,
           middleware: function(connect) {
             return [
               connect.static('.tmp'),
@@ -183,7 +182,8 @@ module.exports = function (grunt) {
       dist: {
         options: {
           base: '<%= webConfig.distPath %>',
-          livereload: false
+          livereload: false,
+          keepalive: true
         }
       }
     },
