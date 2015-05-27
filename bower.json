@@ -1,5 +1,5 @@
 {
-  "name": "pebble2irkit",
+  "name": "pebble-irkit-remote",
   "private": true,
   "dependencies": {
     "bootstrap-sass-official": "~3.3.0"

@@ -13,8 +13,8 @@ var menuState = {
 };
 
 var irkitConfig = {
-  settingsUrl: 'http://makotokw.github.io/pebble-to-irkit/',
-  // settingsUrl: 'http://192.168.1.31:9000/', // for debug
+  settingsUrl: 'http://makotokw.github.io/pebble-irkit-remote/',
+  // settingsUrl: 'http://192.168.1.32:9000/', // for debug
   internetHttpApi: 'https://api.getirkit.com/1',
   useDeviceAPI: false, // for local
   privateAddress: '', // for local

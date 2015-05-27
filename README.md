@@ -1,9 +1,9 @@
-Pebble to IRKit
+IRKit Remote as Pebble Watchapp
 ===================
 
 Send IR signal to [IRKit](http://getirkit.com/). (IRKit device is IR remote controller and is seller in only Japan)
 
-![](https://dl.dropboxusercontent.com/u/8932138/screenshot/pebble/pebble2irkit/pebble2irkit_1.0.png)
+![](https://dl.dropboxusercontent.com/u/8932138/screenshot/pebble/pebble-irkit-remote/pebble-irkit-remote_1.0.png)
 
 ## Development
 
@@ -30,6 +30,7 @@ Send IR signal to [IRKit](http://getirkit.com/). (IRKit device is IR remote cont
 ### Develop watchapp
 
 ```
+npm install
 grunt pebbleDebugBuild
 grunt pebbleInstall
 ```
@@ -37,6 +38,8 @@ grunt pebbleInstall
 ### Develop settings page
 
 ```
+npm install
+bower install
 grunt settingsDebug
 ```
 
@@ -45,6 +48,7 @@ Modify ``irkitConfig.settingsUrl`` on ``src/js/pebble-js-app.js`` to connect loc
 ### Deploy settings page
 
 ```
+grunt settingsBuild
 git commit dist
 git subtree push --prefix dist origin gh-pages
 ```

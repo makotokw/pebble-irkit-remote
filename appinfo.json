@@ -1,10 +1,10 @@
 {
   "uuid": "d2034fe1-68f6-4cb6-aa11-b0aea6be435d",
-  "shortName": "Pebble2IRKit",
-  "longName": "Pebble to IRKit",
+  "shortName": "IRKit Remote",
+  "longName": "IRKit Remote",
   "companyName": "Makoto Kawasaki",
-  "versionCode": 1,
-  "versionLabel": "1.0",
+  "versionCode": 2,
+  "versionLabel": "1.1",
   "capabilities": [
     "configurable"
   ],

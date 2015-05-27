@@ -1,5 +1,6 @@
 {
-  "name": "pebble2irkit",
+  "name": "pebble-irkit-remote",
+  "private": true,
   "devDependencies": {
     "date-utils": "^1.2.16",
     "grunt": "^0.4.5",
