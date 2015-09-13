@@ -193,11 +193,14 @@ module.exports = function (grunt) {
       pebbleBuild: {
         cmd: 'pebble build'
       },
-      pebbleDebugBuild: {
-        cmd: 'pebble build --debug'
-      },
       pebbleInstall: {
-        cmd: 'pebble install'
+        cmd: 'pebble install -v'
+      },
+      pebbleBasaltEmulator: {
+        cmd: 'pebble install -vvvv --emulator basalt'
+      },
+      pebbleApliteEmulator: {
+        cmd: 'pebble install -vvvv --emulator aplite'
       },
       pebbleLogs: {
         cmd: 'pebble logs'
@@ -223,16 +226,16 @@ module.exports = function (grunt) {
     'usemin'
   ]);
 
-  grunt.registerTask('pebbleDebugBuild', [
-    'exec:pebbleDebugBuild'
+  grunt.registerTask('pebbleBuild', [
+    'exec:pebbleBuild'
   ]);
 
   grunt.registerTask('pebbleInstall', [
     'exec:pebbleInstall'
   ]);
 
-  grunt.registerTask('pebbleDebugBuildAndInstall', [
-    'exec:pebbleDebugBuild',
+  grunt.registerTask('pebbleBuildAndInstall', [
+    'exec:pebbleBuild',
     'exec:pebbleInstall'
   ]);
   grunt.registerTask('pebbleLogs', [

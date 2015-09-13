@@ -31,7 +31,7 @@ Send IR signal to [IRKit](http://getirkit.com/). (IRKit device is IR remote cont
 
 ```
 npm install
-grunt pebbleDebugBuild
+grunt pebbleBuild
 grunt pebbleInstall
 ```
 
