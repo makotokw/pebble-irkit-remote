@@ -60,6 +60,7 @@ void commands_init_array() {
     command_name = (char *)malloc(MAX_COMMAND_NAME_BYTE + 1);
     memset(command_name, 0, MAX_COMMAND_NAME_BYTE + 1);
     s_command_names[i] = command_name;
+
   }
 }
 
@@ -67,7 +68,7 @@ void commands_init_array() {
 // Toast: popup text
 
 static void toast_init() {
-  const int16_t toast_height = 25;
+  const int16_t toast_height = 16;
   GRect toast_bounds = GRect(
     s_window_bounds.origin.x,
     s_window_bounds.size.h - toast_height,
@@ -76,6 +77,7 @@ static void toast_init() {
   );
   s_text_layer = text_layer_create(toast_bounds);
   text_layer_set_background_color(s_text_layer, GColorBlack);
+  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   text_layer_set_text_color(s_text_layer, GColorWhite);
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
   layer_set_hidden((Layer *)s_text_layer, true);
