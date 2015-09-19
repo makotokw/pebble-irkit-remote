@@ -19,6 +19,22 @@
     return settings;
   }
 
+  // Get query variables
+  function getQueryParam(variable, defaultValue) {
+    // Find all URL parameters
+    var query = location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split('=');
+
+      // If the query variable parameter is found, decode it to use and return it for use
+      if (pair[0] === variable) {
+        return decodeURIComponent(pair[1]);
+      }
+    }
+    return defaultValue || false;
+  }
+
   $(document).ready(function () {
     $configurationUrl.val(localStorage.getItem('configurationUrl'));
     // overwrite by debugSettings
@@ -31,8 +47,8 @@
       var settings = validateSettings();
       if (settings) {
         localStorage.setItem('configurationUrl', settings.configurationUrl);
-        var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(settings));
-        document.location = location;
+        var returnTo = getQueryParam('return_to', 'pebblejs://close#');
+        document.location = returnTo + encodeURIComponent(JSON.stringify(settings));
       }
     });
   });
