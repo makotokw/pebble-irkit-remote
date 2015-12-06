@@ -3,7 +3,7 @@
   "shortName": "IRKit Remote",
   "longName": "IRKit Remote",
   "companyName": "Makoto Kawasaki",
-  "versionLabel": "1.2",
+  "versionLabel": "1.3",
   "capabilities": [
     "configurable"
   ],
