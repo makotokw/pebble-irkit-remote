@@ -196,14 +196,20 @@ module.exports = function (grunt) {
       pebbleInstall: {
         cmd: 'pebble install -v'
       },
-      pebbleBasaltEmulator: {
-        cmd: 'pebble install -vvvv --emulator basalt'
-      },
       pebbleApliteEmulator: {
         cmd: 'pebble install -vvvv --emulator aplite'
       },
+      pebbleBasaltEmulator: {
+        cmd: 'pebble install -vvvv --emulator basalt'
+      },
+      pebbleChalkEmulator: {
+        cmd: 'pebble install -vvvv --emulator chalk'
+      },
       pebbleLogs: {
         cmd: 'pebble logs'
+      },
+      pebbleScreenshot: {
+        cmd: 'pebble screenshot'
       }
     }
   });
