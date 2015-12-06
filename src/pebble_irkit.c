@@ -3,7 +3,8 @@
 static Window *s_window;
 static GRect s_window_bounds;
 static MenuLayer *s_menu_layer;
-static TextLayer *s_text_layer;
+static BitmapLayer *s_toast_layer;
+static TextLayer *s_toast_text_layer;
 
 #ifdef PBL_SDK_3
 static StatusBarLayer *s_status_bar;
@@ -60,7 +61,6 @@ void commands_init_array() {
     command_name = (char *)malloc(MAX_COMMAND_NAME_BYTE + 1);
     memset(command_name, 0, MAX_COMMAND_NAME_BYTE + 1);
     s_command_names[i] = command_name;
-
   }
 }
 
@@ -68,35 +68,77 @@ void commands_init_array() {
 // Toast: popup text
 
 static void toast_init() {
-  const int16_t toast_height = 16;
+  const GColor background_color = GColorBlack;
+  const GColor foreground_color = GColorWhite;
+#ifdef PBL_ROUND
+  const int16_t toast_height = 32;
+  const int16_t toast_text_height = 24;
+  const char * toast_text_font = FONT_KEY_GOTHIC_18;
+  GRect toast_bounds = GRect(
+    s_window_bounds.origin.x,
+    (s_window_bounds.size.h - toast_height)/2,
+    s_window_bounds.size.w,
+    toast_height
+  );
+  GRect toast_text_bounds = GRect(
+    s_window_bounds.origin.x,
+    (s_window_bounds.size.h - toast_text_height)/2,
+    s_window_bounds.size.w,
+    toast_text_height
+  );
+#else
+  const int16_t toast_height = 18;
+  const int16_t toast_text_height = 18;
+  const char * toast_text_font = FONT_KEY_GOTHIC_14;
   GRect toast_bounds = GRect(
     s_window_bounds.origin.x,
     s_window_bounds.size.h - toast_height,
     s_window_bounds.size.w,
     toast_height
   );
-  s_text_layer = text_layer_create(toast_bounds);
-  text_layer_set_background_color(s_text_layer, GColorBlack);
-  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-  text_layer_set_text_color(s_text_layer, GColorWhite);
-  text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
-  layer_set_hidden((Layer *)s_text_layer, true);
+  GRect toast_text_bounds = GRect(
+    s_window_bounds.origin.x,
+    s_window_bounds.size.h - toast_text_height,
+    s_window_bounds.size.w,
+    toast_text_height
+  );
+#endif
+  // background
+  s_toast_layer = bitmap_layer_create(toast_bounds);
+  Layer *background_layer = (Layer *)s_toast_layer;
+  bitmap_layer_set_background_color(s_toast_layer, background_color);
+  layer_set_hidden(background_layer, true);
+
+  // text
+  s_toast_text_layer = text_layer_create(toast_text_bounds);
+  Layer *text_layer = (Layer *)s_toast_text_layer;
+  text_layer_set_background_color(s_toast_text_layer, background_color);
+  text_layer_set_font(s_toast_text_layer, fonts_get_system_font(toast_text_font));
+  text_layer_set_text_color(s_toast_text_layer, foreground_color);
+  text_layer_set_text_alignment(s_toast_text_layer, GTextAlignmentCenter);
+  layer_set_hidden(text_layer, true);
+
   Layer *window_layer = window_get_root_layer(s_window);
-  layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
+  layer_add_child(window_layer, background_layer);
+  layer_add_child(window_layer, text_layer);
 }
 
 static void toast_show(const char *text) {
-  text_layer_set_text(s_text_layer, text);
-  layer_set_hidden((Layer *)s_text_layer, false);
+  text_layer_set_text(s_toast_text_layer, text);
+  layer_set_hidden(bitmap_layer_get_layer(s_toast_layer), false);
+  layer_set_hidden(text_layer_get_layer(s_toast_text_layer), false);
 }
 
 static void toast_hide() {
-  layer_set_hidden((Layer *)s_text_layer, true);
+  layer_set_hidden(bitmap_layer_get_layer(s_toast_layer), true);
+  layer_set_hidden(text_layer_get_layer(s_toast_text_layer), true);
 }
 
 static void toast_deinit() {
-  text_layer_destroy(s_text_layer);
-  s_text_layer = NULL;
+  text_layer_destroy(s_toast_text_layer);
+  s_toast_text_layer = NULL;
+  bitmap_layer_destroy(s_toast_layer);
+  s_toast_layer = NULL;
 }
 
 // --------------------------------------------------------
@@ -213,6 +255,9 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *ca
 static void menu_init(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
 #ifdef PBL_SDK_3
+#if PBL_ROUND
+  s_menu_layer = menu_layer_create(s_window_bounds);
+#else
   GRect menu_bound = GRect(
     s_window_bounds.origin.x,
     s_window_bounds.origin.y + STATUS_BAR_LAYER_HEIGHT,
@@ -220,6 +265,7 @@ static void menu_init(Window *window) {
     s_window_bounds.size.h - STATUS_BAR_LAYER_HEIGHT
   );
   s_menu_layer = menu_layer_create(menu_bound);
+#endif
 #else
   s_menu_layer = menu_layer_create(s_window_bounds);
 #endif
@@ -227,8 +273,10 @@ static void menu_init(Window *window) {
   menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
     .get_num_sections = menu_get_num_sections_callback,
     .get_num_rows = menu_get_num_rows_callback,
+#ifdef PBL_RECT
     .get_header_height = menu_get_header_height_callback,
     .draw_header = menu_draw_header_callback,
+#endif
     .draw_row = menu_draw_row_callback,
     .select_click = menu_select_callback,
   });
@@ -272,10 +320,12 @@ static void status_bar_init(Window *window) {
   s_status_bar = status_bar_layer_create();
   layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
 
+#if PBL_RECT
   // Show legacy battery meter
   s_battery_layer = layer_create(status_bar_bounds);
   layer_set_update_proc(s_battery_layer, battery_proc);
   layer_add_child(window_layer, s_battery_layer);
+#endif
 #endif
 }
 
