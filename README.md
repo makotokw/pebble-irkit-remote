@@ -5,6 +5,7 @@ Send IR signal to [IRKit](http://getirkit.com/). (IRKit device is IR remote cont
 
 ![](https://dl.dropboxusercontent.com/u/8932138/screenshot/pebble/pebble-irkit-remote/pebble-irkit-remote_1.0.png)
 ![](https://dl.dropboxusercontent.com/u/8932138/screenshot/pebble/pebble-irkit-remote/pebble-irkit-remote_1.2_basalt.png)
+![](https://dl.dropboxusercontent.com/u/8932138/screenshot/pebble/pebble-irkit-remote/pebble-irkit-remote_1.3_chalk.png)
 
 ## Development
 
