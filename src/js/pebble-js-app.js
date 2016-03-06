@@ -89,7 +89,7 @@ function postMessageToIRKitByDeviceAPI(message) {
 /**
  * @param {String} message
  */
-function postMessageToIRKitInternetAPI(message) {
+function postMessageToIRKitByInternetAPI(message) {
   var xhr = new XMLHttpRequest();
   xhr.open('POST', irkitConfig.internetHttpApi + '/messages', true);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -120,13 +120,14 @@ function sendCommandsToPebble(commands) {
 
 Pebble.addEventListener('appmessage',
   function (e) {
+    //noinspection JSUnresolvedVariable
     var commandIndex = e.payload.commandIndex;
     var message = irkitConfig.commands[commandIndex].message;
     console.log('sendCommandByIndex:' + commandIndex);
     if (irkitConfig.useDeviceAPI) {
       postMessageToIRKitByDeviceAPI(message);
     } else {
-      postMessageToIRKitInternetAPI(message);
+      postMessageToIRKitByInternetAPI(message);
     }
   });
 
