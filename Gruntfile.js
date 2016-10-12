@@ -10,7 +10,7 @@ module.exports = function (grunt) {
   var path = require('path');
 
   // watchapp info
-  var appInfo = grunt.file.readJSON('appinfo.json');
+  var appInfo = grunt.file.readJSON('package.json');
   appInfo.baseName = path.basename(__dirname);
   appInfo.buildDate = new Date();
 
@@ -93,7 +93,7 @@ module.exports = function (grunt) {
       pbw: {
         files: [{
           src: '<%= appConfig.buildPath %>/<%= appInfo.baseName %>.pbw',
-          dest: '<%= appConfig.packagesPath %>/<%= appInfo.baseName %>-<%= appInfo.versionLabel %>.pbw'
+          dest: '<%= appConfig.packagesPath %>/<%= appInfo.baseName %>-<%= appInfo.version %>.pbw'
         }]
       },
       dist: {
@@ -192,24 +192,6 @@ module.exports = function (grunt) {
     exec: {
       pebbleBuild: {
         cmd: 'pebble build'
-      },
-      pebbleInstall: {
-        cmd: 'pebble install -v'
-      },
-      pebbleApliteEmulator: {
-        cmd: 'pebble install -vvvv --emulator aplite'
-      },
-      pebbleBasaltEmulator: {
-        cmd: 'pebble install -vvvv --emulator basalt'
-      },
-      pebbleChalkEmulator: {
-        cmd: 'pebble install -vvvv --emulator chalk'
-      },
-      pebbleLogs: {
-        cmd: 'pebble logs'
-      },
-      pebbleScreenshot: {
-        cmd: 'pebble screenshot'
       }
     }
   });
@@ -230,22 +212,6 @@ module.exports = function (grunt) {
     'uglify:generated',
     'copy:dist',
     'usemin'
-  ]);
-
-  grunt.registerTask('pebbleBuild', [
-    'exec:pebbleBuild'
-  ]);
-
-  grunt.registerTask('pebbleInstall', [
-    'exec:pebbleInstall'
-  ]);
-
-  grunt.registerTask('pebbleBuildAndInstall', [
-    'exec:pebbleBuild',
-    'exec:pebbleInstall'
-  ]);
-  grunt.registerTask('pebbleLogs', [
-    'exec:pebbleLogs'
   ]);
 
   grunt.registerTask('build', [
