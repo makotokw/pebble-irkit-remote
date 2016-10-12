@@ -27,7 +27,7 @@
   "scripts": {
     "start": "grunt build && pebble install -vvvv --emulator basalt --logs",
     "build": "grunt build",
-    "clean": "pebble clean",
+    "clean": "grunt cleanBuild",
     "a": "unset PEBBLE_PHONE; pebble install -vvvv --emulator aplite",
     "b": "unset PEBBLE_PHONE; pebble install -vvvv --emulator basalt",
     "c": "unset PEBBLE_PHONE; pebble install -vvvv --emulator chalk",

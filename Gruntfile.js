@@ -76,7 +76,6 @@ module.exports = function (grunt) {
       }
     },
     clean: {
-      app: 'build',
       dist: {
         files: [{
           dot: true,
@@ -192,6 +191,9 @@ module.exports = function (grunt) {
     exec: {
       pebbleBuild: {
         cmd: 'pebble build'
+      },
+      pebbleClean: {
+        cmd: 'pebble clean'
       }
     }
   });
@@ -212,6 +214,11 @@ module.exports = function (grunt) {
     'uglify:generated',
     'copy:dist',
     'usemin'
+  ]);
+
+  grunt.registerTask('cleanBuild', [
+    'exec:pebbleClean',
+    'clean:web'
   ]);
 
   grunt.registerTask('build', [
