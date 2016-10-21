@@ -32,6 +32,7 @@
     "b": "unset PEBBLE_PHONE; pebble install -vvvv --emulator basalt",
     "c": "unset PEBBLE_PHONE; pebble install -vvvv --emulator chalk",
     "d": "unset PEBBLE_PHONE; pebble install -vvvv --emulator diorite",
+    "e": "unset PEBBLE_PHONE; pebble install -vvvv --emulator emery",
     "iphone": "pebble install --phone $PEBBLE_IPHONE",
     "android": "pebble install --phone $PEBBLE_ANDROID"
   },
@@ -66,7 +67,8 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite"
+      "diorite",
+      "emery"
     ],
     "capabilities": [
       "configurable"
